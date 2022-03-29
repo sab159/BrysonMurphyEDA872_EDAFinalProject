@@ -1,0 +1,32 @@
+---
+title: "USGS Water Use Data - EDA Final Project"
+author: "Rebecca Murphy & Sophia Bryson"
+date: "3/29/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+* Introduction:
+** WATER USE ACROSS TIME AND SPACE
+** POWER OF SANKEY DIAGRAMS
+
+* Question:
+
+* Dataset: 
+
+** Source
+
+** Dataset explanation
+
+** Data structure summary at table
+
+* Exploratory Analysis:
+** Water use across space
+** Water use across time 
+
+* Dashboard creation: 
+
+* Summary and conclusions: 
