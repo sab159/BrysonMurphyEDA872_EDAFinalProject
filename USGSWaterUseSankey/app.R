@@ -250,9 +250,9 @@ ui <- fluidPage(
                   #          selectInput("division_year", label = "Select a year", 
                   #                      choices = yearlist),
                   #          sankeyNetworkOutput("DistrictSankey")),
-                  tabPanel("By USACE district",
-                           "\n \n", #create some space
-                            img(src = "USACEDistrictMap.jfif", align = "right", height = "40%", width = "40%"))#,
+                  # tabPanel("By USACE district",
+                  #          "\n \n", #create some space
+                  #           img(src = "USACEDistrictMap.jfif", align = "right", height = "40%", width = "40%"),
                   #          selectInput("USACEDistrict", label = "Select a USACE District",
                   #                      choices = c("FILL IN WITH FILTERED USACE districts")), 
                   #          selectInput("district_year", label = "Select a year", 
