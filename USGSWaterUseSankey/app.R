@@ -75,7 +75,8 @@ library(tidycensus)
       
    #USACE
       #Match spatialLinks to alluse
-      USACEuse <- merge(alluse, USACEmatch, by = c("State", "County", "Name"), all.y = TRUE) 
+      USACEuse <- merge(alluse, USACEmatch, by = c("State", "County", "Name"), all.y = TRUE) %>%
+         na.omit()
          #shorter than all use. Must be counties not in the spatialLink file. 
       
       
@@ -185,9 +186,9 @@ library(tidycensus)
          div.sel <- USACEDivisions
          year.sel <- year
          
-         divyr <- USACEuse %>% filter(Division.y == div.sel & Year == year.sel)
+         divyr <- USACEuse %>% filter(Division.x == div.sel & Year == year.sel)
          
-         divsum <- distyr %>% group_by(USACEDivision, Year, Type, Category) %>% summarize(Total_MGD = sum(MGD, na.rm=TRUE), .groups = "drop")
+         divsum <- divyr %>% group_by(Division.x, Year, Type, Category) %>% summarize(Total_MGD = sum(MGD, na.rm=TRUE), .groups = "drop")
          
          links <- divsum [c("Type","Category", "Total_MGD")]
          links <- filter(links, links$Type != "Total", links$Category != "Total") #Removes "Total" values for accurate scaling
@@ -209,7 +210,7 @@ library(tidycensus)
                             Value = "Total_MGD", NodeID = "name", 
                             sinksRight=FALSE, colourScale = colorAssign, 
                             fontSize = 10, units = "MGD")
-         
+         s
          
       }
       
@@ -223,7 +224,7 @@ library(tidycensus)
       
       distyr <- USACEuse %>% filter(District.y == dis.sel & Year == year.sel)
       
-      dissum <- distyr %>% group_by(USACEDistrict, Year, Type, Category) %>% summarize(Total_MGD = sum(MGD, na.rm=TRUE), .groups = "drop")
+      dissum <- distyr %>% group_by(District.y, Year, Type, Category) %>% summarize(Total_MGD = sum(MGD, na.rm=TRUE), .groups = "drop")
       
       links <- dissum [c("Type","Category", "Total_MGD")]
       links <- filter(links, links$Type != "Total", links$Category != "Total") #Removes "Total" values for accurate scaling
@@ -245,8 +246,7 @@ library(tidycensus)
                          Value = "Total_MGD", NodeID = "name", 
                          sinksRight=FALSE, colourScale = colorAssign, 
                          fontSize = 10, units = "MGD")
-      
-      
+      s
    }
       
 ############################ DEFINE APP UI #####################################
@@ -308,19 +308,19 @@ ui <- fluidPage(
                   tabPanel("By USACE division",
                             "\n \n", #create some space,
                             img(src = "USACEDivisionMap.png", align = "left", height = "70%", width = "70%"),
-                           selectInput("USACEDivision", label = "Select a USACE Division",
+                           selectInput("USACEDivisions", label = "Select a USACE Division",
                                         choices = USACEDivisions), 
                             selectInput("division_year", label = "Select a year", 
                                         choices = yearlist),
                            sankeyNetworkOutput("DistrictSankey")),
                   tabPanel("By USACE district",
                             "\n \n", #create some space
-                             img(src = "USACEDistrictMap.jfif", align = "left", height = "70%", width = "70%"),
+                             img(src = "USACEDistrictMap.jfif", align = "left", height = "90%", width = "90%"),
                            selectInput("USACEDistrict", label = "Select a USACE District",
                                         choices = USACEDistricts), 
                             selectInput("district_year", label = "Select a year", 
                                         choices = yearlist),
-                            sankeyNetworkOutput("USACEDistrictSankey")) #,
+                            sankeyNetworkOutput("DistrictSankey")) #,
                   # tabPanel("Over Time",
                   #          "\n \n",
                   #          "ADD A gganimate here??") #TEMP
@@ -352,11 +352,11 @@ server <- function(input, output, session) {
    output$EPASankey <- renderSankeyNetwork(expr = EPARegionSankey(EPARegion = input$EPARegion,
                                                                   year = input$region_year))
    
-   output$USACEDistrictSankey <- renderSankeyNetwork(expr = USACEDistrictSankey(USACEDistrict = input$USACEDistricts,
-                                                                                year = input@district_year))
+   output$DistrictSankey <- renderSankeyNetwork(expr = USACEDistrictSankey(USACEDistricts = input$USACEDistricts,
+                                                                                year = input$district_year))
    
-   output$USACEDivisionSankey <- renderSankeyNetwork(expr = USACEDivisionSankey(USACEDivision = input$USACEDivisions,
-                                                                                year = input@division_year))
+   output$DivisionSankey <- renderSankeyNetwork(expr = USACEDivisionSankey(USACEDivisions = input$USACEDivisions,
+                                                                                year = input$division_year))
 }
 
 ################################## RUN APP #####################################
