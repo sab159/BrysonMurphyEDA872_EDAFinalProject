@@ -180,11 +180,74 @@ library(tidycensus)
    # Can also add HUC6/HUC8 - I've got draft versions of those fxns -SAB     
 
    # --- USACE Division --------------------------------------------------------
-      #Rebecca - add USACE divisions and districts? 
-      # 1. Define function to generate Sankey fxn here (see above for examples - pretty limited adjustment needed)
-      # 2. Add tab to tabset (inital code already included), with selectors (options list already created above) and Sankey output (in UI, based on fxn defined here)
-      # 3. Add Sankey output renderer to Server fxn
+     
+      USACEDivisionSankey <- function(USACEDivisions, year = "2015") {
+         div.sel <- USACEDivisions
+         year.sel <- year
+         
+         divyr <- USACEuse %>% filter(Division.y == div.sel & Year == year.sel)
+         
+         divsum <- distyr %>% group_by(USACEDivision, Year, Type, Category) %>% summarize(Total_MGD = sum(MGD, na.rm=TRUE), .groups = "drop")
+         
+         links <- divsum [c("Type","Category", "Total_MGD")]
+         links <- filter(links, links$Type != "Total", links$Category != "Total") #Removes "Total" values for accurate scaling
+         as.data.frame(links)
+         
+         nodes <- data.frame(
+            name=c(as.character(links$Type), 
+                   as.character(links$Category)) %>% unique()
+         )
+         
+         links$IDsource <- match(links$Type, nodes$name)-1 
+         links$IDtarget <- match(links$Category, nodes$name)-1
+         
+         colorAssign <- 'd3.scaleOrdinal() .domain(["SW", "GW","Industrial", "Power", "Public", "Mining", "Irrigation", "Livestock", "Domestic"]) 
+            .range(["lightsteelblue", "navy" , "darkgrey", "goldenrod", "maroon", "peru", "darkolivegreen", "indianred", "darkcyan"])'
+         
+         s <- sankeyNetwork(Links = links, Nodes = nodes, LinkGroup = "Type",
+                            Source = "IDsource", Target = "IDtarget",
+                            Value = "Total_MGD", NodeID = "name", 
+                            sinksRight=FALSE, colourScale = colorAssign, 
+                            fontSize = 10, units = "MGD")
+         
+         
+      }
+      
+      
    # --- USACE District --------------------------------------------------------
+      
+
+   USACEDistrictSankey <- function(USACEDistricts, year = "2015") {
+      dis.sel <- USACEDistricts
+      year.sel <- year
+      
+      distyr <- USACEuse %>% filter(District.y == dis.sel & Year == year.sel)
+      
+      dissum <- distyr %>% group_by(USACEDistrict, Year, Type, Category) %>% summarize(Total_MGD = sum(MGD, na.rm=TRUE), .groups = "drop")
+      
+      links <- dissum [c("Type","Category", "Total_MGD")]
+      links <- filter(links, links$Type != "Total", links$Category != "Total") #Removes "Total" values for accurate scaling
+      as.data.frame(links)
+      
+      nodes <- data.frame(
+         name=c(as.character(links$Type), 
+                as.character(links$Category)) %>% unique()
+      )
+      
+      links$IDsource <- match(links$Type, nodes$name)-1 
+      links$IDtarget <- match(links$Category, nodes$name)-1
+      
+      colorAssign <- 'd3.scaleOrdinal() .domain(["SW", "GW","Industrial", "Power", "Public", "Mining", "Irrigation", "Livestock", "Domestic"]) 
+            .range(["lightsteelblue", "navy" , "darkgrey", "goldenrod", "maroon", "peru", "darkolivegreen", "indianred", "darkcyan"])'
+      
+      s <- sankeyNetwork(Links = links, Nodes = nodes, LinkGroup = "Type",
+                         Source = "IDsource", Target = "IDtarget",
+                         Value = "Total_MGD", NodeID = "name", 
+                         sinksRight=FALSE, colourScale = colorAssign, 
+                         fontSize = 10, units = "MGD")
+      
+      
+   }
       
 ############################ DEFINE APP UI #####################################
 
@@ -236,28 +299,28 @@ ui <- fluidPage(
                   # tabPanel("By Watershed", sankeyNetworkOutput("HUC4Sankey")),
                   tabPanel("By EPA region", 
                            "\n \n", #create some space
-                           img(src = "EPARegionMap.png", height="40%", width="40%", align="right"),
+                           img(src = "EPARegionMap.png", height="70%", width="70%", align="left"),
                            selectInput("EPARegion", label = "Select an EPA region",
                                        choices = EPARegions), 
                            selectInput("region_year", label = "Select a year", 
                                        choices = yearlist),
-                           sankeyNetworkOutput("EPASankey")) #,
-                  # tabPanel("By USACE division",
-                  #          "\n \n", #create some space,
-                  #           img(src = "USACEDivisionMap.png", align = "right", height = "40%", width = "40%"),
-                  #          selectInput("USACEDivision", label = "Select a USACE Division",
-                  #                      choices = c("FILL IN WITH FILTERED USACE divisions")), 
-                  #          selectInput("division_year", label = "Select a year", 
-                  #                      choices = yearlist),
-                  #          sankeyNetworkOutput("DistrictSankey")),
-                  # tabPanel("By USACE district",
-                  #          "\n \n", #create some space
-                  #           img(src = "USACEDistrictMap.jfif", align = "right", height = "40%", width = "40%"),
-                  #          selectInput("USACEDistrict", label = "Select a USACE District",
-                  #                      choices = c("FILL IN WITH FILTERED USACE districts")), 
-                  #          selectInput("district_year", label = "Select a year", 
-                  #                      choices = yearlist),
-                  #          sankeyNetworkOutput("DistrictSankey")),
+                           sankeyNetworkOutput("EPASankey")) ,
+                  tabPanel("By USACE division",
+                            "\n \n", #create some space,
+                            img(src = "USACEDivisionMap.png", align = "left", height = "70%", width = "70%"),
+                           selectInput("USACEDivision", label = "Select a USACE Division",
+                                        choices = USACEDivisions), 
+                            selectInput("division_year", label = "Select a year", 
+                                        choices = yearlist),
+                           sankeyNetworkOutput("DistrictSankey")),
+                  tabPanel("By USACE district",
+                            "\n \n", #create some space
+                             img(src = "USACEDistrictMap.jfif", align = "left", height = "70%", width = "70%"),
+                           selectInput("USACEDistrict", label = "Select a USACE District",
+                                        choices = USACEDistricts), 
+                            selectInput("district_year", label = "Select a year", 
+                                        choices = yearlist),
+                            sankeyNetworkOutput("USACEDistrictSankey")) #,
                   # tabPanel("Over Time",
                   #          "\n \n",
                   #          "ADD A gganimate here??") #TEMP
@@ -282,13 +345,18 @@ server <- function(input, output, session) {
                                                                   county = input$county, 
                                                                   year = input$county_year))
    
-   # output$HUC4Sankey <- renderSankeyNetwork({})
+   # output$HUC4Sankey <- renderSankeyNetwork()
    #    
    # output$HUC8Sankey <- renderSankeyNetwork({})
       
    output$EPASankey <- renderSankeyNetwork(expr = EPARegionSankey(EPARegion = input$EPARegion,
                                                                   year = input$region_year))
    
+   output$USACEDistrictSankey <- renderSankeyNetwork(expr = USACEDistrictSankey(USACEDistrict = input$USACEDistricts,
+                                                                                year = input@district_year))
+   
+   output$USACEDivisionSankey <- renderSankeyNetwork(expr = USACEDivisionSankey(USACEDivision = input$USACEDivisions,
+                                                                                year = input@division_year))
 }
 
 ################################## RUN APP #####################################
