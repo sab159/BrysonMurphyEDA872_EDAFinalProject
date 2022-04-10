@@ -36,13 +36,19 @@ library(tidycensus)
                            "numeric", "numeric", "character", "character", "numeric")
       huc8use.data <- read.csv(file = "data/processed/water_use/HUC8Use.csv", colClasses = huc8use.classes)
       
- 
+   # spatial links
+      #Load match file for USACE dist & div    
+      USACEmatch <- read.csv(file = "data/processed/spatial/spatialLinks.csv")
+      
+    
 ### Define domains #############################################################
       
       statelist <- unique(alluse$State)
       yearlist <- unique(alluse$Year)
       countylist <- unique(alluse$Name)
       EPARegions <- paste("Region", as.character(seq(1, 10, 1)))
+      USACEDivisions <- unique(USACEmatch$Division)
+      USACEDistricts <- unique(USACEmatch$District)
       
       #Match EPA Regions to states: https://www.epa.gov/aboutepa/regional-and-geographic-offices
       RegionStateMatch <- list("Region 1" = c("CT", "ME", "MA", "NH", "RI", "VT"), 
@@ -64,7 +70,14 @@ library(tidycensus)
       
 ### Create modified dataframes #################################################
    
-   epaUse <- alluse %>% merge(., RegionStatePairs, by = "State")
+   # EPA Regions
+      epaUse <- alluse %>% merge(., RegionStatePairs, by = "State")
+      
+   #USACE
+      #Match spatialLinks to alluse
+      USACEuse <- merge(alluse, USACEmatch, by = c("State", "County", "Name"), all.y = TRUE) 
+         #shorter than all use. Must be counties not in the spatialLink file. 
+      
       
 ### Define functions ###########################################################
 
@@ -166,6 +179,13 @@ library(tidycensus)
       }
    # Can also add HUC6/HUC8 - I've got draft versions of those fxns -SAB     
 
+   # --- USACE Division --------------------------------------------------------
+      #Rebecca - add USACE divisions and districts? 
+      # 1. Define function to generate Sankey fxn here (see above for examples - pretty limited adjustment needed)
+      # 2. Add tab to tabset (inital code already included), with selectors (options list already created above) and Sankey output (in UI, based on fxn defined here)
+      # 3. Add Sankey output renderer to Server fxn
+   # --- USACE District --------------------------------------------------------
+      
 ############################ DEFINE APP UI #####################################
 
 ui <- fluidPage(
@@ -192,7 +212,10 @@ ui <- fluidPage(
                            "The data and more information can be found on the ", 
                            tags$a(href = 'https://waterdata.usgs.gov/nwis/wu', 'USGS Water Data for the Nation website'),
                            h3("\n\nUsing the dashboard"),
-                           "**INSTRUCTIONS ON HOW TO USE THE DASHBOARD HERE**"), #TEMP
+                           "Water use data can be visualized for a variety of geographic areas and extents.",
+                           "Select a tab above corresponding to a political (state or county) or administrative (EPA region, USACE Division or District) geography,",
+                           "then use the menus to select a specific geographic unit and year.",
+                           "Reference maps are provided to identify the locations and extentes of EPA regions and USACE Districts and Divisions."), 
                   tabPanel("By State", 
                            "\n \n", #create some space
                            selectInput("state", label = "Select a state",
@@ -213,13 +236,15 @@ ui <- fluidPage(
                   # tabPanel("By Watershed", sankeyNetworkOutput("HUC4Sankey")),
                   tabPanel("By EPA region", 
                            "\n \n", #create some space
+                           img(src = "EPARegionMap.png", height="40%", width="40%", align="right"),
                            selectInput("EPARegion", label = "Select an EPA region",
                                        choices = EPARegions), 
                            selectInput("region_year", label = "Select a year", 
                                        choices = yearlist),
                            sankeyNetworkOutput("EPASankey")) #,
                   # tabPanel("By USACE division",
-                  #          "\n \n", #create some space
+                  #          "\n \n", #create some space,
+                  #           img(src = "USACEDivisionMap.png", align = "right", height = "40%", width = "40%"),
                   #          selectInput("USACEDivision", label = "Select a USACE Division",
                   #                      choices = c("FILL IN WITH FILTERED USACE divisions")), 
                   #          selectInput("division_year", label = "Select a year", 
@@ -227,6 +252,7 @@ ui <- fluidPage(
                   #          sankeyNetworkOutput("DistrictSankey")),
                   # tabPanel("By USACE district",
                   #          "\n \n", #create some space
+                  #           img(src = "USACEDistrictMap.jfif", align = "right", height = "40%", width = "40%"),
                   #          selectInput("USACEDistrict", label = "Select a USACE District",
                   #                      choices = c("FILL IN WITH FILTERED USACE districts")), 
                   #          selectInput("district_year", label = "Select a year", 
@@ -250,17 +276,17 @@ server <- function(input, output, session) {
    
 
    output$stateSankey <- renderSankeyNetwork(expr = StateSankey(state = input$state, 
-                                                                 year = input$state_year))
+                                                                year = input$state_year))
    
    output$countySankey <- renderSankeyNetwork(expr = CountySankey(state = input$state_county, 
-                                                                   county = input$county, 
-                                                                   year = input$county_year))
+                                                                  county = input$county, 
+                                                                  year = input$county_year))
    
    # output$HUC4Sankey <- renderSankeyNetwork({})
    #    
    # output$HUC8Sankey <- renderSankeyNetwork({})
       
-   output$EPASankey <- renderSankeyNetwork(expr = EPARegionSankey(EPARegion = input$EPARegion, 
+   output$EPASankey <- renderSankeyNetwork(expr = EPARegionSankey(EPARegion = input$EPARegion,
                                                                   year = input$region_year))
    
 }
@@ -284,9 +310,9 @@ shinyApp(ui = ui, server = server)
 # + Region of interest (state, huc, EPA)
 # + Year
 
-# Animate?
+# Animate? could maybe use gganimate to show changes in water use over time? 
       
-#Possible to select by map rather than by list? Worth trying?   
+#Possible to select by map rather than by list? Worth trying?  https://community.rstudio.com/t/select-polygon-by-clicking-on-map-changing-item-selected-via-dropdown/89211/2 
       
 # Add values (MGD) to diagrams? 
    
