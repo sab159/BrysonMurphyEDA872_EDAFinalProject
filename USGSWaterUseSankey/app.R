@@ -275,12 +275,12 @@ ui <- fluidPage(
    # Create tabs to allow for geometry type selection
       tabsetPanel(type = "tabs",
                   tabPanel("About the dashboard", 
-                           h3("The Data"),
+                           h3("The Data:"),
                            "The data in this dashboard are from USGS records of water use across the nation, reported by source and category.",
                            "These usage estimates are provided at 5-year intervals from 1985 through 2015.",
                            "The data and more information can be found on the ", 
                            tags$a(href = 'https://waterdata.usgs.gov/nwis/wu', 'USGS Water Data for the Nation website'),
-                           h3("\n\nUsing the dashboard"),
+                           h3("\n\nUsing the Dashboard:"),
                            "Water use data can be visualized for a variety of geographic areas and extents.",
                            "Select a tab above corresponding to a political (state or county) or administrative (EPA region, USACE Division or District) geography,",
                            "then use the menus to select a specific geographic unit and year.",
@@ -322,7 +322,7 @@ ui <- fluidPage(
                   tabPanel("By USACE District",
                             "\n \n", #create some space
                              img(src = "USACEDistrictMap.jfif", align = "left", height = "70%", width = "70%"),
-                           selectInput("USACEDistrict", label = "Select a USACE District",
+                           selectInput("USACEDistricts", label = "Select a USACE District",
                                         choices = USACEDistricts), 
                            selectInput("district_year", label = "Select a year", 
                                         choices = yearlist),
