@@ -312,7 +312,9 @@ ui <- fluidPage(
                                        choices = yearlist),
                            sankeyNetworkOutput("EPASankey")) ,
                   tabPanel("By USACE Division",
-                            "\n \n", #create some space,
+                            "\n \n", #create some space
+                           "Find additional information about USACE Divisions and Districts", 
+                           tags$a(href = 'https://www.usace.army.mil/Missions/Civil-Works/Navigation-Locks/', 'here.'),
                             img(src = "USACEDivisionMap.png", align = "left", height = "70%", width = "70%"),
                            selectInput("USACEDivisions", label = "Select a USACE Division",
                                         choices = USACEDivisions), 
@@ -321,6 +323,8 @@ ui <- fluidPage(
                            sankeyNetworkOutput("DivisionSankey")),
                   tabPanel("By USACE District",
                             "\n \n", #create some space
+                           "Find additional information about USACE Divisions and Districts", 
+                           tags$a(href = 'https://www.usace.army.mil/Missions/Civil-Works/Navigation-Locks/', 'here.'),
                              img(src = "USACEDistrictMap.jfif", align = "left", height = "70%", width = "70%"),
                            selectInput("USACEDistricts", label = "Select a USACE District",
                                         choices = USACEDistricts), 
