@@ -305,7 +305,7 @@ ui <- fluidPage(
                   # tabPanel("By Watershed", sankeyNetworkOutput("HUC4Sankey")),
                   tabPanel("By EPA region", 
                            "\n \n", #create some space
-                           img(src = "EPARegionMap.png", height="70%", width="70%", align="left"),
+                           img(src = "EPARegionMap.png", height="50%", width="50%", align="right"),
                            selectInput("EPARegion", label = "Select an EPA region",
                                        choices = EPARegions), 
                            selectInput("region_year", label = "Select a year", 
@@ -315,7 +315,6 @@ ui <- fluidPage(
                             "\n \n", #create some space
                            "Find additional information about USACE Divisions and Districts", 
                            tags$a(href = 'https://www.usace.army.mil/Missions/Civil-Works/Navigation-Locks/', 'here.'),
-                            img(src = "USACEDivisionMap.png", align = "left", height = "70%", width = "70%"),
                            selectInput("USACEDivisions", label = "Select a USACE Division",
                                         choices = USACEDivisions), 
                            selectInput("division_year", label = "Select a year", 
@@ -325,7 +324,6 @@ ui <- fluidPage(
                             "\n \n", #create some space
                            "Find additional information about USACE Divisions and Districts", 
                            tags$a(href = 'https://www.usace.army.mil/Missions/Civil-Works/Navigation-Locks/', 'here.'),
-                             img(src = "USACEDistrictMap.jfif", align = "left", height = "70%", width = "70%"),
                            selectInput("USACEDistricts", label = "Select a USACE District",
                                         choices = USACEDistricts), 
                            selectInput("district_year", label = "Select a year", 
