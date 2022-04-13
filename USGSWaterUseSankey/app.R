@@ -305,7 +305,7 @@ ui <- fluidPage(
                   # tabPanel("By Watershed", sankeyNetworkOutput("HUC4Sankey")),
                   tabPanel("By EPA region", 
                            "\n \n", #create some space
-                           img(src = "EPARegionMap.png", height="50%", width="50%", align="right"),
+                           img(src = "EPARegionMap.png", height="50%", width="50%", align="left"),
                            selectInput("EPARegion", label = "Select an EPA region",
                                        choices = EPARegions), 
                            selectInput("region_year", label = "Select a year", 
